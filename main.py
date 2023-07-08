@@ -4,6 +4,7 @@ import sv_ttk
 from tkinter import filedialog
 from bs4 import BeautifulSoup
 import requests
+import preferences as pref
 
 root = tk.Tk()
 root.geometry("800x500")
@@ -191,18 +192,30 @@ def toggle_theme():
     """Swap between dark and light theme"""
     current_theme = sv_ttk.get_theme()
     if current_theme == "dark":
-        sv_ttk.set_theme("light")
+        new_theme = "light"
     else:
-        sv_ttk.set_theme("dark")
+        new_theme = "dark"
+    sv_ttk.set_theme(new_theme)
+    config = pref.load_config()
+    config["THEME"] = new_theme
+    pref.save_config(config)
 
-toggle_button = ttk.Button(settings_frame, text="Toggle Light Mode", command=toggle_theme)
-toggle_button.grid(row=3, column=0, padx=0, pady=10) # Place this anywhere, maybe in a new top nav bar?
+# Add menu (Works on macOS, have not checked Windows yet)
+menubar = tk.Menu(root)
+filemenu = tk.Menu(menubar, tearoff=0)
+filemenu.add_command(label="Toggle light mode", command=toggle_theme)
+menubar.add_cascade(label="Preferences", menu=filemenu)
+editmenu = tk.Menu(menubar, tearoff=0)
 
 # sets the display option.
 var.set("Select elements")
 # runs the on_option_selected() fuction if a option is selected.
 var.trace("w", on_option_selected)
 
-sv_ttk.set_theme("dark")
+root.config(menu=menubar)
+
+current_theme = pref.get_theme()
+sv_ttk.set_theme(current_theme)
+
 root.resizable(False, False)
 root.mainloop()
